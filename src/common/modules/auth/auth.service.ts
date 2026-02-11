@@ -10,6 +10,7 @@ export class AuthService{
         //!ser mas restringidos, osea que si o si sea de tipo string
         //!El any consume mas memoria
     }
+
 }
 
 //!iniciar por el servicio, recomendable

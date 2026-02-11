@@ -11,4 +11,7 @@ export class AuthController{
     public logIn(): string{
         return this.authSvc.logIn();
     }
+
+    
+
 }

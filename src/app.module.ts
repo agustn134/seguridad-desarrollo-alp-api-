@@ -4,6 +4,7 @@ import { TaskModule } from './common/modules/task/task.module';
 
 @Module({
   imports: [AuthModule, TaskModule],
+  exports:['DATABASE_CONNECTION'],
   controllers: [],
   providers: [],
 })
