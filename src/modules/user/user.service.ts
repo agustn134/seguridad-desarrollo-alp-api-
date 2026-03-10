@@ -7,8 +7,6 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService{
     
-    
-
     // Inyectamos Prisma para poder usar this.prisma.user
     constructor(private prisma: PrismaService) {}
 
@@ -27,7 +25,6 @@ export class UserService{
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(userDto.password, salt);
 
-        // Creamos el usuario reemplazando la contraseña en texto plano por el hash
         const newUser = await this.prisma.user.create({
             data: {
                 ...userDto,

@@ -1,15 +1,15 @@
-import { isNotEmpty, isString, MaxLength, MinLength } from "class-validator";
+import { IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 
-export class AuthDo{
-    @isNotEmpty()
-    @isString()
+export class AuthDto {
+    @IsNotEmpty()
+    @IsString()
     @MinLength(3)
     @MaxLength(100)
-    username: string;
+    username!: string;
 
-    @isNotEmpty()
-    @isString()
+    @IsNotEmpty()
+    @IsString()
     @MinLength(3)
     @MaxLength(200)
-    password: string;
+    password!: string;
 }
