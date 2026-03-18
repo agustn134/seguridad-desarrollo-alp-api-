@@ -4,49 +4,59 @@ import { Client } from 'pg';
 import { Task } from '@prisma/client';
 import { UpdateTaskDto } from './dto/update.task.dto';
 import { PrismaService } from 'src/prisma.service';
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 @Injectable()
 export class TaskService {
   constructor(
-    @Inject('DATABASE_CONNECTION')
-    private db: Client,
     private prisma: PrismaService,
   ) { }
 
-  private tasks: any[] = [];
+  //private tasks: any[] = [];
 
-  public async getTasks(): Promise<Task[]> {
-    const tasks = await this.prisma.task.findMany();
-    return tasks;
+  // Listar solo tareas del usuario
+  public async getTasks(userId: number): Promise<Task[]> {
+    return await this.prisma.task.findMany({
+      where: { user_id: userId },
+    });
   }
 
-  public async getTaskById(id: number): Promise<Task | null> {
+  //Buscar por ID de tarea Y ID de usuario
+  public async getTaskById(id: number, userId: number): Promise<Task | null> {
     const task = await this.prisma.task.findUnique({
-      where: { id: id },
+      where: { id: id, user_id: userId },
     });
     return task;
   }
 
+  //Insertar usando el ID del JWT
   public async insertTask(task: CreateTaskDto): Promise<any> {
-    const newTask = await this.prisma.task.create({
+    return await this.prisma.task.create({
       data: task,
     });
-    return newTask;
   }
 
-  public async updateTask(id: number, taskUpdated: UpdateTaskDto): Promise<any> {
-    console.log(taskUpdated);
-    const task = await this.prisma.task.update({
-      where: { id: id },
+  //actualizar solo si le pertenece
+  public async updateTask(id: number, userId: number, taskUpdated: UpdateTaskDto): Promise<any> {
+    const task = await this.prisma.task.findFirst({ where: { id, user_id: userId } });
+    if (!task) throw new HttpException("No tienes permiso o la tarea no existe", 403);
+    return await this.prisma.task.update({
+      where: { id },
       data: taskUpdated,
     });
-    return task;
   }
 
-  public async deleteTask(id: number): Promise<boolean> {
-    const task = await this.prisma.task.delete({
-      where: { id: id },
-    });
-    return !!task;
+  public async deleteTask(id: number, userId: number): Promise<Task> {
+    //intentar borrar con doble condición de seguridad
+    try {
+      const task = await this.getTaskById(id, userId);
+      if (!task) throw new Error();
+
+      return await this.prisma.task.delete({
+        where: { id: id }
+      });
+    } catch (error) {
+      throw new HttpException("No se pudo eliminar la tarea", HttpStatus.FORBIDDEN);
+    }
   }
 }

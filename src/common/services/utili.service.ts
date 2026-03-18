@@ -15,7 +15,12 @@ export class UtilService {
 
     }
 
-    public async generarJWT(payload: any): Promise<string> {
-        return this.jwtSvc.signAsync(payload, { secret: process.env.JWT_SECRET });
+    public async generarJWT(payload: any, expiresIn: any = '60s'): Promise<string> {
+        return this.jwtSvc.signAsync(payload, { secret: process.env.JWT_SECRET, expiresIn });
     }
+
+    public async getPayload(jwt: string): Promise<any> {
+        return await this.jwtSvc.verifyAsync(jwt, { secret: process.env.JWT_SECRET });
+    }
+
 }
