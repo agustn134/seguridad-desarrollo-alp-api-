@@ -15,7 +15,7 @@ export class UtilService {
 
     }
 
-    public async generarJWT(payload: any, expiresIn: any = '60s'): Promise<string> {
+    public async generarJWT(payload: any, expiresIn: any = '7d'): Promise<string> {
         return this.jwtSvc.signAsync(payload, { secret: process.env.JWT_SECRET, expiresIn });
     }
 

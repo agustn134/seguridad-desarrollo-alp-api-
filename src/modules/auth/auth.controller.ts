@@ -1,10 +1,12 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, Body } from "@nestjs/common";
+import { Req, UseGuards, Controller, Get, HttpCode, HttpStatus, Post, Body } from "@nestjs/common";
 import { ApiOperation } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { ok } from "assert";
 import { JwtService } from "@nestjs/jwt";
 import { AuthDto } from "./dto/auth.dto";
 import { UtilService } from '../../common/services/utili.service';
+import { AuthGuard } from '../../common/guards/auth.guard';
+
 
 @Controller("api/auth")
 export class AuthController {
@@ -59,9 +61,10 @@ export class AuthController {
 
     @Get("me")
     @ApiOperation({ summary: 'Extrae el ID del usuario desde el token y busca la informacion' })
-
-    public getMe(): string {
-        return this.authSvc.getMe();
+    @UseGuards(AuthGuard)
+    public getMe(@Req() request: any): Promise<any> {
+        const user = request['user'];
+        return user;
     }
 
     @Post("refresh")

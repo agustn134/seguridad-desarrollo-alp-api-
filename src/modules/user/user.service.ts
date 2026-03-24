@@ -1,52 +1,71 @@
-import { Injectable }  from "@nestjs/common";
-import { PrismaService} from 'src/prisma.service'
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from 'src/prisma.service'
 import { User } from '@prisma/client';
 import { CreateUserDto } from "./dto/create.user.dto";
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UserService{
-    
+export class UserService {
+
     // Inyectamos Prisma para poder usar this.prisma.user
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService) { }
 
     public async getUsers(): Promise<User[]> {
         return await this.prisma.user.findMany();
     }
 
-    public async getUserById(id: number): Promise<User | null> {
-        return await this.prisma.user.findUnique({
-            where: { id: id }
-        });
+    public async getUserById(id: number): Promise<any> {
+        try {
+            return await this.prisma.user.findUniqueOrThrow({
+                where: { id },
+                select: {
+                    id: true,
+                    name: true,
+                    lastname: true,
+                    username: true,
+                    password: false,
+                    created_at: true
+                }
+            });
+        } catch (error) {
+            throw new Error('Usuario no encontrado');
+        }
     }
 
-    public async insertUser(userDto: CreateUserDto): Promise<User> {
-        // Encriptamos la contraseña generada por el usuario antes de guardarla
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(userDto.password, salt);
-
-        const newUser = await this.prisma.user.create({
-            data: {
-                ...userDto,
-                password: hashedPassword,
+    public async insertUser(userDto: CreateUserDto): Promise<any> {
+        return await this.prisma.user.create({
+            data: userDto,
+            select: {
+                id: true,
+                name: true,
+                lastname: true,
+                username: true,
+                password: false,
+                created_at: true
             }
         });
-
-        return newUser;
     }
 
-    public async updateUser(id: number, userUpdated: any): Promise<User> {
+    public async updateUser(id: number, userUpdated: any): Promise<any> {
         return await this.prisma.user.update({
             where: { id: id },
-            data: userUpdated
+            data: userUpdated,
+            select: {
+                id: true,
+                name: true,
+                lastname: true,
+                username: true,
+                password: false,
+                created_at: true
+            }
         });
     }
 
     public async deleteUser(id: number): Promise<boolean> {
-        const user = await this.prisma.user.delete({
+        await this.prisma.user.delete({
             where: { id: id }
         });
-        return !!user;
+        return true;
     }
 
 }

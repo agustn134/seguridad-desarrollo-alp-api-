@@ -1,7 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Put, UseGuards, Request } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create.user.dto";
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from "./user.service";
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { UtilService } from "src/common/services/utili.service";
 
 //el servicio es el que se conecta a la base de datos4
 //que no arroje un error 500
@@ -9,47 +11,88 @@ import { UserService } from "./user.service";
 
 @ApiTags('users')
 @Controller('api/user')
-export class UserController{
+export class UserController {
 
-    constructor(private readonly userSvc: UserService) {}
+    constructor(
+        private readonly userSvc: UserService,
+        private readonly utilService: UtilService
+    ) { }
 
-    @Get()
-    @ApiOperation({ summary: 'Obtiene todos los usuarios' })
-    public async getUsers(): Promise<any[]> {
-        return await this.userSvc.getUsers();
+    @Post()
+    @ApiOperation({ summary: 'Registrar un nuevo usuario' })
+    public async insertUser(@Body() user: CreateUserDto): Promise<any> {
+        try {
+            user.password = await this.utilService.hashPassword(user.password);
+            return await this.userSvc.insertUser(user);
+        } catch (error) {
+            throw new HttpException('Error al insertar el usuario', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @Get(':id')
-    public async getUserById(@Param('id', ParseIntPipe) id: number): Promise<any> {
-        const user = await this.userSvc.getUserById(id);
-        if (user) return user;
-        throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
-    }
+    // @Get()
+    // @ApiOperation({ summary: 'Obtiene todos los usuarios' })
+    // public async getUsers(): Promise<any[]> {
+    //     return await this.userSvc.getUsers();
+    // }
+
+    // @Get(':id')
+    // public async getUserById(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    //     const user = await this.userSvc.getUserById(id);
+    //     if (user) return user;
+    //     throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    // }
 
     // @Post()
     // public async insertUser(@Body() user: CreateUserDto): Promise<any> {
     //     // TODO: Conectar con el UserService más adelante
     //     return user; 
     // }
-    @Post()
-    public async insertUser(@Body() user: CreateUserDto): Promise<any> {
-        return await this.userSvc.insertUser(user); 
+
+
+    @UseGuards(AuthGuard)
+    @Get('profile')
+    @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
+    public async getProfile(@Request() req: any): Promise<any> {
+        return await this.userSvc.getUserById(req.user.id);
     }
 
-    @Put(':id')
-    public async updateUser(@Param('id', ParseIntPipe) id: number, @Body() user: any): Promise<any> {
-        return this.userSvc.updateUser(id, user);
-    }
-
-    @Delete(':id')
-    @HttpCode(HttpStatus.OK)
-    public async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<boolean> {
+    @UseGuards(AuthGuard)
+    @Patch('profile')
+    @ApiOperation({ summary: 'Actualizar perfil del usuario autenticado' })
+    public async updateProfile(@Request() req: any, @Body() updateUserDto: any): Promise<any> {
         try {
-            await this.userSvc.deleteUser(id);
+            if (updateUserDto.password) {
+                updateUserDto.password = await
+                    this.utilService.hashPassword(updateUserDto.password);
+            }
+            return await this.userSvc.updateUser(req.user.id, updateUserDto);
         } catch (error) {
-            throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+            throw new HttpException('Error al actualizar el usuario', HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return true;
     }
-    
+
+    // @Delete(':id')
+    // @HttpCode(HttpStatus.OK)
+    // public async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<boolean> {
+    //     try {
+    //         await this.userSvc.deleteUser(id);
+    //     } catch (error) {
+    //         throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    //     }
+    //     return true;
+    // }
+
+    @UseGuards(AuthGuard)
+    @Delete('profile')
+    @ApiOperation({ summary: 'Eliminar cuenta del usuario autenticado' })
+    public async deleteProfile(@Request() req: any): Promise<any> {
+        try {
+            return await this.userSvc.deleteUser(req.user.id);
+        } catch (error) {
+            throw new HttpException('Error deleting user', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
 }
