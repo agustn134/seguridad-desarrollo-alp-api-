@@ -22,7 +22,7 @@ export class UserController {
     @ApiOperation({ summary: 'Registrar un nuevo usuario' })
     public async insertUser(@Body() user: CreateUserDto): Promise<any> {
         try {
-            user.password = await this.utilService.hashPassword(user.password);
+            user.password = await this.utilService.hash(user.password);
             return await this.userSvc.insertUser(user);
         } catch (error) {
             throw new HttpException('Error al insertar el usuario', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -63,13 +63,14 @@ export class UserController {
         try {
             if (updateUserDto.password) {
                 updateUserDto.password = await
-                    this.utilService.hashPassword(updateUserDto.password);
+                    this.utilService.hash(updateUserDto.password);
             }
             return await this.userSvc.updateUser(req.user.id, updateUserDto);
         } catch (error) {
             throw new HttpException('Error al actualizar el usuario', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     // @Delete(':id')
     // @HttpCode(HttpStatus.OK)

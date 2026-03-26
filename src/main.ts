@@ -30,7 +30,7 @@ bootstrap();
 //! git commit -a -m "fix:Estructura funcional del CRUD de Tareas y uso de validaciones"
 //! git commit -a -m "fix:Conexion a base de datos  tradicional"
 //! git commit -a -m "fix: Uso de prisma y correcion de CRUD (Tareas y Usuarios)"
-
+//! git commit -a -m "fix: Correccion de refrsh y  logout"
 
 //? BCRYPT
 //! npm i bcrypt

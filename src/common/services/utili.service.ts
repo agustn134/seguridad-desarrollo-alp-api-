@@ -4,8 +4,9 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UtilService {
     constructor(private jwtSvc: JwtService) { }
-    public async hashPassword(password: string): Promise<string> {
-        return await bcrypt.hash(password, 10);
+
+    public async hash(text: string): Promise<string> {
+        return await bcrypt.hash(text, 10);
         ///con checkpassword como el mismo servidor genero la contraseña, 
         // el mismo puede checar la contraseña pero no se puede hacer la ingenieria inversa para obtener las constraseñas
     }

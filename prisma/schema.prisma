@@ -72,6 +72,7 @@ model User {
   lastname   String   @db.VarChar(250)
   username   String   @db.VarChar(100)
   password   String
+  hash String?
   created_at DateTime @default(now())
   tasks      Task[]
 } 

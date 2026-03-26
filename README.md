@@ -104,4 +104,5 @@ Cuando se modifica el archivo schema.
 
 '''cmd
 npx prisma migrate dev --name init
+npx prisma generate
 '''
