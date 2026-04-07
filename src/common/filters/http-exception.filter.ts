@@ -1,9 +1,13 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { PrismaService } from 'src/prisma.service';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
-    catch(exception: unknown, host: ArgumentsHost) {
+
+    constructor(private readonly prisma: PrismaService) { }
+
+    async catch(exception: unknown, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
@@ -17,6 +21,28 @@ export class AllExceptionFilter implements ExceptionFilter {
             exception instanceof HttpException
                 ? exception.getResponse()
                 : 'Internal server error';
+
+        const user = request['user'];
+
+        //almacenar la informacion en la base de datos
+        //recordar que el usuario lo vamos a obtener de donde viene del request, por que envia su token en los killers 
+        // y hacer el commit
+        // -git commit -a -m "fix: Almacenamiento de logs"
+
+        try {
+            await this.prisma.logs.create({
+                data: {
+                    statuscode: status,
+                    timestamp: new Date(),
+                    path: request.url,
+                    error: typeof message === 'string' ? message : JSON.stringify(message),
+                    errorCode: exception instanceof Error ? exception.name : 'Exception',
+                    user_id: user ? user.id : null,
+                }
+            });
+        } catch (error) {
+            console.error('Error al guardar el log', error);
+        }
 
         response.status(status).json({
             statusCode: status,

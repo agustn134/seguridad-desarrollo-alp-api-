@@ -24,4 +24,17 @@ export class UtilService {
         return await this.jwtSvc.verifyAsync(jwt, { secret: process.env.JWT_SECRET });
     }
 
+    public async getTokens(payload: any) {
+        const refresh_token = await this.generarJWT(payload, '7d');
+        const hashRT = await this.hash(refresh_token);
+        payload.hash = hashRT;  //payload para el token dde acceso
+        const access_token = await this.generarJWT(payload, '1h');
+
+        return {
+            access_token,
+            refresh_token,
+            hashRT
+        };
+    }
+
 }

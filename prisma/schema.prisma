@@ -75,6 +75,7 @@ model User {
   hash String?
   created_at DateTime @default(now())
   tasks      Task[]
+  logs logs[]
 } 
   
 model Task {
@@ -84,4 +85,16 @@ model Task {
   priority    Boolean @default(false)
   user_id     Int
   user        User    @relation(fields: [user_id], references: [id])
+}
+
+model logs{
+  id Int @id @default(autoincrement())
+  statuscode Int
+  timestamp DateTime
+  path String @db.Text
+  error String @db.Text
+  errorCode String @db.Text
+  session_id Int?
+  user_id    Int?
+  user User? @relation(fields: [user_id], references: [id])
 }

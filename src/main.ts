@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionFilter } from './common/filters/http-exception.filter';
+import { PrismaService } from './prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,7 +12,8 @@ async function bootstrap() {
     skipNullProperties: true
   }));
 
-  app.useGlobalFilters(new AllExceptionFilter());
+  const prismaService = app.get(PrismaService);
+  app.useGlobalFilters(new AllExceptionFilter(prismaService));
 
   const config = new DocumentBuilder()
     .setTitle('API de Agustín')
