@@ -15,7 +15,7 @@ export class AuthGuard implements CanActivate {
             throw new UnauthorizedException(); ///no se proporcionó un token, denegar acceso 401
 
         try {
-            const payload = this.utilSvc.getPayload(token); //se decodifica el token
+            const payload = await this.utilSvc.getPayload(token); //se decodifica el token
             request['user'] = payload; //agrega el payload a la solicitud
         } catch (error) {
             console.error(error);

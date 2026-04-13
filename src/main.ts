@@ -4,9 +4,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionFilter } from './common/filters/http-exception.filter';
 import { PrismaService } from './prisma.service';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(helmet()); //se instala el helmet para proteger la api DE INYECCIONES XSS EXTRACÑAS
+  app.enableCors(); //pa permitir que angular se conecte
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     skipNullProperties: true

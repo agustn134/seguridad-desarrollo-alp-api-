@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, IsNotEmpty, IsNumber, IsString, MaxLength, Min, MinLength } from "class-validator";
+import { IsBoolean, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength } from "class-validator";
 
 export class CreateTaskDto {
     @IsString()
@@ -13,13 +13,14 @@ export class CreateTaskDto {
     @MaxLength(500)
     description!: string;
 
-    @IsBoolean()
-    @IsNotEmpty()
-    priority!: boolean;
+    // @IsBoolean()
+    @IsOptional()
+    priority?: boolean;
 
+    @IsOptional()
     @IsNumber()
     @IsInt()
-    user_id!: number;
+    user_id!: number; //para que el frontend no tenga que enviar el id
 }
 
 //! npm i pg
