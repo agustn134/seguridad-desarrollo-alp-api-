@@ -17,12 +17,12 @@ export class AllExceptionFilter implements ExceptionFilter {
                 ? exception.getStatus()
                 : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        // Aseguramos que si es un error 500, el usuario solo vea un mensaje amigable
+        //que si es un error 500, el usuario solo vea un mensaje amigable
         const exceptionResponse: any = exception instanceof HttpException
             ? exception.getResponse()
             : null;
 
-        // Extraemos solo el texto o el arreglo de textos, e ignoramos el objeto ruidoso
+        //olo el texto o el arreglo de textos e ignoramos el objeto
         const message = exceptionResponse?.message || exceptionResponse || 'Ocurrió un error inesperado en el servidor. Intente después.';
 
 

@@ -8,8 +8,8 @@ import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([{ //se instaló el throttler para proteger la api
-      ttl: 60000,     //pues acá estamos haciendo que el usuario tenga 10 intentos cada 60 segundos
+    ThrottlerModule.forRoot([{ // throttler para proteger la api
+      ttl: 60000,     //10 intentos cada 60 segundos
       limit: 10,
     }]), AuthModule, TaskModule, UserModule, AuditModule],
   controllers: [],

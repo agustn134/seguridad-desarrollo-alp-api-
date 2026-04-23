@@ -12,7 +12,6 @@ export class TaskService {
     private prisma: PrismaService,
   ) { }
 
-  //private tasks: any[] = [];
 
   // Listar solo tareas del usuario
   public async getTasks(userId: number): Promise<Task[]> {
@@ -48,39 +47,36 @@ export class TaskService {
   }
 
   public async updateTask(id: number, task: UpdateTaskDto, userId: number): Promise<any> {
-      // 1. Verificamos que la tarea le pertenezca al usuario que hace la petición
-      const taskExists = await this.prisma.task.findFirst({
-          where: { id: id, user_id: userId }
-      });
+    const taskExists = await this.prisma.task.findFirst({
+      where: { id: id, user_id: userId }
+    });
 
-      if (!taskExists) {
-          throw new UnauthorizedException('No tienes permiso para editar esta tarea o no existe');
-      }
-
-      // 2. Si pasó la prueba, la actualizamos
-      return await this.prisma.task.update({
-          where: { id: id },
-          data: task,
-      });
+    if (!taskExists) {
+      throw new UnauthorizedException('No tienes permiso para editar esta tarea o no existe');
+    }
+    return await this.prisma.task.update({
+      where: { id: id },
+      data: task,
+    });
   }
 
   public async deleteTask(id: number, userId: number): Promise<boolean> {
-      const taskExists = await this.prisma.task.findFirst({
-          where: { id: id, user_id: userId }
-      });
+    const taskExists = await this.prisma.task.findFirst({
+      where: { id: id, user_id: userId }
+    });
 
-      if (!taskExists) {
-          throw new UnauthorizedException('No tienes permiso para eliminar esta tarea o no existe');
-      }
+    if (!taskExists) {
+      throw new UnauthorizedException('No tienes permiso para eliminar esta tarea o no existe');
+    }
 
-      await this.prisma.task.delete({
-          where: { id: id }
-      });
+    await this.prisma.task.delete({
+      where: { id: id }
+    });
 
-      await this.prisma.log.create({
-          data: { action: 'ELIMINACION_TAREA', severity: 'ADVERTENCIA', statuscode: 200, path: '/api/task', user_id: userId, error: `El usuario eliminó la tarea ID: ${id}` }
-      });
+    await this.prisma.log.create({
+      data: { action: 'ELIMINACION_TAREA', severity: 'ADVERTENCIA', statuscode: 200, path: '/api/task', user_id: userId, error: `El usuario eliminó la tarea ID: ${id}` }
+    });
 
-      return true;
+    return true;
   }
 }

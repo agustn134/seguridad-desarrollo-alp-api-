@@ -39,19 +39,6 @@ export class UserController {
         return await this.userSvc.getUsers();
     }
 
-    // @Get(':id')
-    // public async getUserById(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    //     const user = await this.userSvc.getUserById(id);
-    //     if (user) return user;
-    //     throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
-    // }
-
-    // @Post()
-    // public async insertUser(@Body() user: CreateUserDto): Promise<any> {
-    //     // TODO: Conectar con el UserService más adelante
-    //     return user; 
-    // }
-
 
     @UseGuards(AuthGuard)
     @Get('profile')
@@ -75,31 +62,19 @@ export class UserController {
         }
     }
 
-
-    // @Delete(':id')
-    // @HttpCode(HttpStatus.OK)
-    // public async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<boolean> {
-    //     try {
-    //         await this.userSvc.deleteUser(id);
-    //     } catch (error) {
-    //         throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
-    //     }
-    //     return true;
-    // }
-
     @Patch(':id/password')
     @UseGuards(AuthGuard, RolesGuard)
-    @Roles('ADMIN') // 👈 RBAC: Bloquea a los usuarios normales instantáneamente
+    @Roles('ADMIN')
     @ApiOperation({ summary: 'Actualizar contraseña de otro usuario (SOLO ADMIN)' })
     public async resetUserPassword(
-        @Param('id') targetId: string,
+        @Param('id', ParseIntPipe) targetId: number,
         @Body('password') newPassword: string,
         @Req() req: any
     ) {
         // Obtenemos el ID del administrador desde el token de la cookie
-        const adminId = req.user.id; 
-        
-        return await this.userSvc.adminUpdatePassword(Number(targetId), newPassword, adminId);
+        const adminId = req.user.id;
+
+        return await this.userSvc.adminUpdatePassword(targetId, newPassword, adminId);
     }
 
     @UseGuards(AuthGuard)

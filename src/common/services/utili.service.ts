@@ -7,8 +7,6 @@ export class UtilService {
 
     public async hash(text: string): Promise<string> {
         return await bcrypt.hash(text, 10);
-        ///con checkpassword como el mismo servidor genero la contraseña, 
-        // el mismo puede checar la contraseña pero no se puede hacer la ingenieria inversa para obtener las constraseñas
     }
 
     public async checkPassword(password: string, encryptedPassword: string): Promise<boolean> {

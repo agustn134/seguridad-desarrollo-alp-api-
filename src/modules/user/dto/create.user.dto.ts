@@ -9,7 +9,7 @@ export class CreateUserDto {
     name!: string;
 
     @IsString()
-    @IsNotEmpty({ message: 'El apellido es obligatorio' })
+    @IsNotEmpty({ message: 'Apellido obligatorio' })
     @MinLength(3, { message: 'El apellido debe tener al menos 3 caracteres' })
     @MaxLength(250)
     @Matches(/^(?!\s*$).+/, { message: 'El apellido no puede contener solo espacios en blanco' })
