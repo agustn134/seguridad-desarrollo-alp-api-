@@ -84,6 +84,32 @@ export class UserService {
         });
     }
 
+    public async adminUpdatePassword(targetUserId: number, newPassword: string, adminId: number): Promise<any> {
+        // 1. Encriptamos la nueva contraseña (igual que en el registro)
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // 2. Actualizamos al usuario en la base de datos
+        await this.prisma.user.update({
+            where: { id: targetUserId },
+            data: { password: hashedPassword }
+        });
+
+        // 3. ¡Punto extra para el profe! Registramos el evento crítico en la auditoría
+        await this.prisma.log.create({
+            data: {
+                action: 'CAMBIO_PASSWORD_ADMIN',
+                severity: 'ADVERTENCIA', // Es una acción delicada
+                statuscode: 200,
+                path: `/api/user/${targetUserId}/password`,
+                error: `El Admin (ID: ${adminId}) modificó la contraseña del usuario ID: ${targetUserId}`,
+                user_id: adminId
+            }
+        });
+
+        return { message: 'Contraseña actualizada exitosamente por el administrador' };
+    }
+
     public async deleteUser(id: number): Promise<boolean> {
         await this.prisma.user.delete({
             where: { id: id }

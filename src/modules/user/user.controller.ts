@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Put, UseGuards, Request } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Put, UseGuards, Request, Req } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create.user.dto";
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from "./user.service";
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { UtilService } from "src/common/services/utili.service";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { Roles } from "src/common/decorators/roles.decorator";
 
 //el servicio es el que se conecta a la base de datos4
 //que no arroje un error 500
@@ -31,6 +32,7 @@ export class UserController {
     }
 
     @UseGuards(AuthGuard, RolesGuard)
+    @Roles('ADMIN') // Recuperado 
     @Get()
     @ApiOperation({ summary: 'Obtiene todos los usuarios (SOLO ADMIN)' })
     public async getUsers(): Promise<any[]> {
@@ -84,6 +86,21 @@ export class UserController {
     //     }
     //     return true;
     // }
+
+    @Patch(':id/password')
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('ADMIN') // 👈 RBAC: Bloquea a los usuarios normales instantáneamente
+    @ApiOperation({ summary: 'Actualizar contraseña de otro usuario (SOLO ADMIN)' })
+    public async resetUserPassword(
+        @Param('id') targetId: string,
+        @Body('password') newPassword: string,
+        @Req() req: any
+    ) {
+        // Obtenemos el ID del administrador desde el token de la cookie
+        const adminId = req.user.id; 
+        
+        return await this.userSvc.adminUpdatePassword(Number(targetId), newPassword, adminId);
+    }
 
     @UseGuards(AuthGuard)
     @Delete('profile')
