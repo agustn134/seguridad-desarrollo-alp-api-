@@ -76,6 +76,11 @@ export class TaskService {
       await this.prisma.task.delete({
           where: { id: id }
       });
+
+      await this.prisma.log.create({
+          data: { action: 'ELIMINACION_TAREA', severity: 'ADVERTENCIA', statuscode: 200, path: '/api/task', user_id: userId, error: `El usuario eliminó la tarea ID: ${id}` }
+      });
+
       return true;
   }
 }

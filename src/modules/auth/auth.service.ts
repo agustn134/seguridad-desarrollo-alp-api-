@@ -30,19 +30,27 @@ export class AuthService {
 
     public async login(loginDto: any): Promise<any> {
         const user = await this.getUserByUsername(loginDto.username);
+        
         if (!user) {
+            //  LOG: Intento con usuario que no existe
+            await this.prisma.log.create({ data: { action: 'LOGIN_FALLIDO', severity: 'ADVERTENCIA', statuscode: 401, path: '/api/auth/login', error: `Intento fallido: ${loginDto.username}` }});
             throw new UnauthorizedException('El usuario y/o contraseña es incorrecto');
         }
+
         const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
 
         if (!isPasswordValid) {
+            //  LOG: Contraseña incorrecta
+            await this.prisma.log.create({ data: { action: 'LOGIN_FALLIDO', severity: 'ADVERTENCIA', statuscode: 401, path: '/api/auth/login', user_id: user.id, error: 'Contraseña incorrecta' }});
             throw new UnauthorizedException('El usuario y/o contraseña es incorrecto');
         }
+
         const { password, ...result } = user;
-        return {
-            message: 'Login exitoso',
-            user: result
-        };
+        
+        // LOG: Login Exitoso (Opcional, pero le encanta a los profes)
+        await this.prisma.log.create({ data: { action: 'LOGIN_EXITOSO', severity: 'INFO', statuscode: 200, path: '/api/auth/login', user_id: user.id, error: 'Sesión iniciada' }});
+
+        return { message: 'Login exitoso', user: result };
     }
 
     // public logIn(): string{
