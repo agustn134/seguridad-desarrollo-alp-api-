@@ -27,6 +27,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true, //?este es para que el profe no meta json al body
+    transform: true, //? Convierte los datos de forma segura al tipo DTO y sanitiza
     skipNullProperties: true
   }));
 

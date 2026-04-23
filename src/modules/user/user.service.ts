@@ -10,8 +10,17 @@ export class UserService {
     // Inyectamos Prisma para poder usar this.prisma.user
     constructor(private prisma: PrismaService) { }
 
-    public async getUsers(): Promise<User[]> {
-        return await this.prisma.user.findMany();
+    public async getUsers(): Promise<Partial<User>[]> {
+        return await this.prisma.user.findMany({
+            select: {
+                id: true,
+                name: true,
+                lastname: true,
+                username: true,
+                role: true,
+                created_at: true
+            }
+        });
     }
 
     public async getUserById(id: number): Promise<any> {
@@ -23,7 +32,7 @@ export class UserService {
                     name: true,
                     lastname: true,
                     username: true,
-                    password: false,
+                    role: true,
                     created_at: true
                 }
             });
@@ -33,17 +42,6 @@ export class UserService {
     }
 
     public async insertUser(userDto: CreateUserDto): Promise<any> {
-        // return await this.prisma.user.create({
-        //     data: userDto,
-        //     select: {
-        //         id: true,
-        //         name: true,
-        //         lastname: true,
-        //         username: true,
-        //         password: false,
-        //         created_at: true
-        //     }
-        // });
         try {
             const saltRounds = 10;
             const salt = await bcrypt.genSalt(saltRounds);
@@ -59,7 +57,6 @@ export class UserService {
                     lastname: true,
                     username: true,
                     role: true,
-                    password: false,
                     created_at: true
                 }
             });
@@ -81,7 +78,7 @@ export class UserService {
                 name: true,
                 lastname: true,
                 username: true,
-                password: false,
+                role: true,
                 created_at: true
             }
         });

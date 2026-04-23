@@ -60,9 +60,14 @@ export class TaskController {
   //     return this.taskSvc.updateTask(id, task);
   // }
   @Put(':id')
-  public async updateTask(@Param('id', ParseIntPipe) id: number, @Body() task: UpdateTaskDto, @Req() request: any) {
-    const userId = request.user.id;
-    return await this.taskSvc.updateTask(id, userId, task);
+  @ApiOperation({ summary: 'Actualizar una tarea' })
+  public async updateTask(
+      @Param('id') id: string, 
+      @Body() task: UpdateTaskDto,
+      @Req() request: any 
+  ): Promise<any> {
+      const user = request['user']; 
+      return await this.taskSvc.updateTask(Number(id), task, user.id); 
   }
 
   //? DELETE http://localhost:3000/api/task/:id
@@ -89,11 +94,14 @@ export class TaskController {
   //     return true;
   // }
   @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar una tarea' })
   @HttpCode(HttpStatus.OK)
-  public async deleteTask(@Param('id', ParseIntPipe) id: number, @Req() request: any) {
-    const userId = request.user.id;
-    await this.taskSvc.deleteTask(id, userId);
-    return true;
+  public async deleteTask(
+      @Param('id') id: string,
+      @Req() request: any 
+  ): Promise<any> {
+      const user = request['user']; 
+      return await this.taskSvc.deleteTask(Number(id), user.id); 
   }
 
 }

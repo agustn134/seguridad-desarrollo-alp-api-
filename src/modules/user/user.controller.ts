@@ -4,6 +4,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from "./user.service";
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { UtilService } from "src/common/services/utili.service";
+import { RolesGuard } from "src/common/guards/roles.guard";
 
 //el servicio es el que se conecta a la base de datos4
 //que no arroje un error 500
@@ -29,11 +30,12 @@ export class UserController {
         }
     }
 
-    // @Get()
-    // @ApiOperation({ summary: 'Obtiene todos los usuarios' })
-    // public async getUsers(): Promise<any[]> {
-    //     return await this.userSvc.getUsers();
-    // }
+    @UseGuards(AuthGuard, RolesGuard)
+    @Get()
+    @ApiOperation({ summary: 'Obtiene todos los usuarios (SOLO ADMIN)' })
+    public async getUsers(): Promise<any[]> {
+        return await this.userSvc.getUsers();
+    }
 
     // @Get(':id')
     // public async getUserById(@Param('id', ParseIntPipe) id: number): Promise<any> {
