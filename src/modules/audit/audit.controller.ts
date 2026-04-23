@@ -19,7 +19,7 @@ export class AuditController {
     }
 
     @UseGuards(AuthGuard, RolesGuard)
-    @Roles('ADMIN') // 👈 RBAC: ¡Solo el profe (Admin) entra aquí!
+    @Roles('ADMIN')
     @Get('all')
     @ApiOperation({ summary: 'Obtiene TODOS los logs con filtros (SOLO ADMIN)' })
     public async getAllLogs(@Query() query: any) {

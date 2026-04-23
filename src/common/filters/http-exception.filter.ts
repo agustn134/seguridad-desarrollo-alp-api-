@@ -17,17 +17,13 @@ export class AllExceptionFilter implements ExceptionFilter {
                 ? exception.getStatus()
                 : HttpStatus.INTERNAL_SERVER_ERROR;
 
+        // Aseguramos que si es un error 500, el usuario solo vea un mensaje amigable
         const message =
             exception instanceof HttpException
                 ? exception.getResponse()
-                : 'Internal server error';
+                : 'Ocurrió un error inesperado en el servidor. Intente después.';
 
         const user = request['user'];
-
-        //almacenar la informacion en la base de datos
-        //recordar que el usuario lo vamos a obtener de donde viene del request, por que envia su token en los killers 
-        // y hacer el commit
-        // -git commit -a -m "fix: Almacenamiento de logs"
 
         try {
             await this.prisma.log.create({
