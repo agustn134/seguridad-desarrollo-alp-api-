@@ -31,6 +31,17 @@ export class TaskService {
 
   //Insertar usando el ID del JWT
   public async insertTask(task: CreateTaskDto): Promise<any> {
+    await this.prisma.log.create({
+      data: {
+        action: 'CREACION_TAREA',
+        severity: 'INFO',
+        statuscode: 201,
+        path: '/api/task',
+        user_id: task.user_id,
+        error: `El usuario creó la tarea: ${task.name}`
+      }
+    });
+
     return await this.prisma.task.create({
       data: task,
     });

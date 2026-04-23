@@ -30,8 +30,10 @@ export class AllExceptionFilter implements ExceptionFilter {
         // -git commit -a -m "fix: Almacenamiento de logs"
 
         try {
-            await this.prisma.logs.create({
+            await this.prisma.log.create({
                 data: {
+                    action: 'EXCEPCION_HTTP',
+                    severity: status >= 500 ? 'ERROR' : 'ADVERTENCIA',
                     statuscode: status,
                     timestamp: new Date(),
                     path: request.url,

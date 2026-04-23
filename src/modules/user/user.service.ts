@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from 'src/prisma.service'
 import { User } from '@prisma/client';
 import { CreateUserDto } from "./dto/create.user.dto";
@@ -33,17 +33,43 @@ export class UserService {
     }
 
     public async insertUser(userDto: CreateUserDto): Promise<any> {
-        return await this.prisma.user.create({
-            data: userDto,
-            select: {
-                id: true,
-                name: true,
-                lastname: true,
-                username: true,
-                password: false,
-                created_at: true
+        // return await this.prisma.user.create({
+        //     data: userDto,
+        //     select: {
+        //         id: true,
+        //         name: true,
+        //         lastname: true,
+        //         username: true,
+        //         password: false,
+        //         created_at: true
+        //     }
+        // });
+        try {
+            const saltRounds = 10;
+            const salt = await bcrypt.genSalt(saltRounds);
+            const hashedPassword = await bcrypt.hash(userDto.password, salt);
+            return await this.prisma.user.create({
+                data: {
+                    ...userDto,
+                    password: hashedPassword,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    lastname: true,
+                    username: true,
+                    role: true,
+                    password: false,
+                    created_at: true
+                }
+            });
+        } catch (error) {
+            if (error.code === 'P2002') {
+                throw new BadRequestException('El nombre de usuario ya está registrado. Por favor, elige otro.');
             }
-        });
+
+            throw new InternalServerErrorException('Ocurrió un error al intentar crear el usuario.');
+        }
     }
 
     public async updateUser(id: number, userUpdated: any): Promise<any> {

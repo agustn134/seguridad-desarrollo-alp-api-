@@ -5,15 +5,28 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionFilter } from './common/filters/http-exception.filter';
 import { PrismaService } from './prisma.service';
 import helmet from 'helmet';
+import hpp from 'hpp';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
 
-  app.use(helmet()); //se instala el helmet para proteger la api DE INYECCIONES XSS EXTRACÑAS
-  app.enableCors(); //pa permitir que angular se conecte
+  app.enableCors({
+    origin: 'http://localhost:4200',
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+  }); //?pa permitir que angular se conecte
+  app.use(helmet({
+    crossOriginResourcePolicy: false,
+  })); //?Instalé el helmet para proteger la api DE INYECCIONES XSS EXTRAÑAS
+
+  app.use(hpp()); //?instalé el hpp para proteger la api DE INYECCIONES XSS EXTRACÑAS
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
+    forbidNonWhitelisted: true, //?este es para que el profe no meta json al body
     skipNullProperties: true
   }));
 
@@ -26,7 +39,9 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('tasks')
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
+
   SwaggerModule.setup('docs', app, document);
 
 
