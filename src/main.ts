@@ -20,7 +20,8 @@ async function bootstrap() {
   }); //?pa permitir que angular se conecte
   app.use(helmet({
     crossOriginResourcePolicy: false,
-  })); //?Instalé el helmet para proteger la api DE INYECCIONES XSS EXTRAÑAS
+  })
+  ); //?Instalé el helmet para proteger la api DE INYECCIONES XSS EXTRAÑAS
 
   app.use(hpp()); //?instalé el hpp para proteger la api DE INYECCIONES XSS EXTRACÑAS
 
