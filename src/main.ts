@@ -10,30 +10,7 @@ import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.use(cookieParser());
-
-  app.enableCors({
-    origin: 'http://localhost:4200',
-    credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Accept, Authorization',
-  }); //?pa permitir que angular se conecte
-  app.use(helmet({
-    crossOriginResourcePolicy: false,
-  })
-  ); //?Instalé el helmet para proteger la api DE INYECCIONES XSS EXTRAÑAS
-
-  app.use(hpp()); //?instalé el hpp para proteger la api DE INYECCIONES XSS EXTRACÑAS
-
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true, //?este es para que el profe no meta json al body
-    transform: true, //? Convierte los datos de forma segura al tipo DTO y sanitiza
-    skipNullProperties: true
-  }));
-
   const prismaService = app.get(PrismaService);
-  app.useGlobalFilters(new AllExceptionFilter(prismaService));
 
   const config = new DocumentBuilder()
     .setTitle('API de Agustín')
@@ -42,10 +19,35 @@ async function bootstrap() {
     .addTag('tasks')
     .build();
 
+
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('docs', app, document);
+  app.use(cookieParser());
 
+  app.enableCors({
+    origin: 'http://localhost:4200',
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+  });
+
+  app.use(helmet({
+    crossOriginResourcePolicy: false,
+  })
+  );
+
+  app.use(hpp());
+
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+    skipNullProperties: true
+  }));
+
+  app.useGlobalFilters(new AllExceptionFilter(prismaService));
+
+  SwaggerModule.setup('docs', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
 }

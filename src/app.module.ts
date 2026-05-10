@@ -3,21 +3,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TaskModule } from './modules/task/task.module';
 import { UserModule } from './modules/user/user.module';
 import { AuditModule } from './modules/audit/audit.module';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { PrismaService } from './prisma.service';
 
 @Module({
-  imports: [
-    ThrottlerModule.forRoot([{ // throttler para proteger la api
-      ttl: 60000,     //10 intentos cada 60 segundos
-      limit: 10,
-    }]), AuthModule, TaskModule, UserModule, AuditModule],
+  imports: [UserModule, AuthModule, TaskModule, AuditModule],
   controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    } //aplicacmos la proteccion a nivel global
-  ],
+  providers: [PrismaService],
 })
 export class AppModule { }

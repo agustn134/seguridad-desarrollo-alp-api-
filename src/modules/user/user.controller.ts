@@ -23,12 +23,7 @@ export class UserController {
     @Post()
     @ApiOperation({ summary: 'Registrar un nuevo usuario' })
     public async insertUser(@Body() user: CreateUserDto): Promise<any> {
-        try {
-            // user.password = await this.utilService.hash(user.password);
-            return await this.userSvc.insertUser(user);
-        } catch (error) {
-            throw new HttpException('Error al insertar el usuario', HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return await this.userSvc.insertUser(user);
     }
 
     @UseGuards(AuthGuard, RolesGuard)
@@ -51,15 +46,12 @@ export class UserController {
     @Patch('profile')
     @ApiOperation({ summary: 'Actualizar perfil del usuario autenticado' })
     public async updateProfile(@Request() req: any, @Body() updateUserDto: any): Promise<any> {
-        try {
-            if (updateUserDto.password) {
-                updateUserDto.password = await
-                    this.utilService.hash(updateUserDto.password);
-            }
-            return await this.userSvc.updateUser(req.user.id, updateUserDto);
-        } catch (error) {
-            throw new HttpException('Error al actualizar el usuario', HttpStatus.INTERNAL_SERVER_ERROR);
+        if (updateUserDto.password) {
+            updateUserDto.password = await
+                this.utilService.hash(updateUserDto.password);
         }
+        return await this.userSvc.updateUser(req.user.id, updateUserDto);
+
     }
 
     @Patch(':id/password')
@@ -71,9 +63,7 @@ export class UserController {
         @Body('password') newPassword: string,
         @Req() req: any
     ) {
-        // Obtenemos el ID del administrador desde el token de la cookie
         const adminId = req.user.id;
-
         return await this.userSvc.adminUpdatePassword(targetId, newPassword, adminId);
     }
 
@@ -81,11 +71,7 @@ export class UserController {
     @Delete('profile')
     @ApiOperation({ summary: 'Eliminar cuenta del usuario autenticado' })
     public async deleteProfile(@Request() req: any): Promise<any> {
-        try {
-            return await this.userSvc.deleteUser(req.user.id);
-        } catch (error) {
-            throw new HttpException('Error deleting user', HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return await this.userSvc.deleteUser(req.user.id);
     }
 
 

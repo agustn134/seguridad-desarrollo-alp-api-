@@ -1,6 +1,8 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrismaService } from 'src/prisma.service';
+import { Prisma } from '@prisma/client';
+import { PrismaClienteExcepcionesErrores } from './prisma-cliente-excepcioones-errores.filter';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
@@ -12,17 +14,21 @@ export class AllExceptionFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
 
+        if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+            const prismaFilter = new PrismaClienteExcepcionesErrores();
+            return prismaFilter.catch(exception, host);
+        }
+
+
         const status =
             exception instanceof HttpException
                 ? exception.getStatus()
                 : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        //que si es un error 500, el usuario solo vea un mensaje amigable
         const exceptionResponse: any = exception instanceof HttpException
             ? exception.getResponse()
             : null;
 
-        //olo el texto o el arreglo de textos e ignoramos el objeto
         const message = exceptionResponse?.message || exceptionResponse || 'Ocurrió un error inesperado en el servidor. Intente después.';
 
 
