@@ -45,6 +45,7 @@ export class UserService {
         return await this.prisma.user.create({
             data: {
                 ...userDto,
+                username: userDto.username.toLowerCase(),
                 password: hashedPassword,
             },
             select: {
