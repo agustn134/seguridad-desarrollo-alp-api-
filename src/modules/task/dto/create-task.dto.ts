@@ -16,7 +16,8 @@ export class CreateTaskDto {
     description!: string;
 
     @IsOptional()
-    @IsBoolean()
+    @IsBoolean({ message: 'La prioridad debe ser un valor booleano.' })
+    @IsNotEmpty({ message: 'Debes definir una prioridad para la tarea.' })
     priority?: boolean;
 
     @IsOptional()
