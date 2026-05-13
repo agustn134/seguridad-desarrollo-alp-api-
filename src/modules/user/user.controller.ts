@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Put, UseGuards, Request, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Put, UseGuards, Request, Req, UnauthorizedException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create.user.dto";
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from "./user.service";
@@ -7,9 +7,6 @@ import { UtilService } from "src/common/services/utili.service";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { Roles } from "src/common/decorators/roles.decorator";
 
-//el servicio es el que se conecta a la base de datos4
-//que no arroje un error 500
-//no es correcto que el usuario repita la contraseña al arorjar los datos, de echo sera en el usuario service
 
 @ApiTags('users')
 @Controller('api/user')
@@ -27,7 +24,7 @@ export class UserController {
     }
 
     @UseGuards(AuthGuard, RolesGuard)
-    @Roles('ADMIN') // Recuperado 
+    @Roles('ADMIN')
     @Get()
     @ApiOperation({ summary: 'Obtiene todos los usuarios (SOLO ADMIN)' })
     public async getUsers(): Promise<any[]> {
@@ -77,6 +74,34 @@ export class UserController {
     @Patch(':id')
     update(@Param('id') id: string, @Body() updateData: any) {
         return this.userSvc.update(+id, updateData);
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('ADMIN')
+    @Delete(':id')
+    async deleteUser(
+        @Param('id', ParseIntPipe) id: number,
+        @Request() req: any
+    ) {
+        if (req.user.id === id) {
+            throw new UnauthorizedException('No puedes eliminar tu propia cuenta.');
+        }
+
+        return await this.userSvc.delete(id, req.user.id);
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('ADMIN')
+    @Patch(':id/role')
+    async updateRole(
+        @Param('id', ParseIntPipe) id: number,
+        @Body('role') role: string,
+        @Request() req: any
+    ) {
+        if (req.user.id === id) {
+            throw new UnauthorizedException('No puedes cambiar tu propio rol por seguridad.');
+        }
+        return await this.userSvc.updateRole(id, role, req.user.id);
     }
 
 }

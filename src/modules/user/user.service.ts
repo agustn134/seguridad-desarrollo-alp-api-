@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from 'src/prisma.service'
-import { User } from '@prisma/client';
+import { User, Role } from '@prisma/client';
 import { CreateUserDto } from "./dto/create.user.dto";
 import * as bcrypt from 'bcrypt';
 
@@ -122,6 +122,57 @@ export class UserService {
 
         const { password, hash, ...result } = updatedUser;
         return result;
+    }
+
+    public async delete(id: number, adminId: number): Promise<any> {
+        const userExists = await this.prisma.user.findUnique({ where: { id } });
+
+        if (!userExists) {
+            throw new NotFoundException('El usuario no existe.');
+        }
+
+        await this.prisma.task.deleteMany({ where: { user_id: id } });
+        await this.prisma.log.deleteMany({ where: { user_id: id } });
+
+        await this.prisma.user.delete({
+            where: { id },
+        });
+
+        await this.prisma.log.create({
+            data: {
+                action: 'USUARIO_ELIMINADO',
+                severity: 'CRITICO',
+                statuscode: 200,
+                path: `/api/user/${id}`,
+                error: `Se eliminó al usuario @${userExists.username} (ID: ${userExists.id}).`,
+                user_id: adminId
+            }
+        });
+
+        return { message: 'Usuario eliminado exitosamente' };
+    }
+
+    public async updateRole(id: number, role: string, adminId: number): Promise<any> {
+        const userExists = await this.prisma.user.findUnique({ where: { id } });
+        if (!userExists) throw new NotFoundException('El usuario no existe.');
+
+        const updatedUser = await this.prisma.user.update({
+            where: { id },
+            data: { role: role as Role },
+        });
+
+        await this.prisma.log.create({
+            data: {
+                action: 'CAMBIO_DE_ROL',
+                severity: 'ADVERTENCIA',
+                statuscode: 200,
+                path: `/api/user/${id}/role`,
+                error: `Se actualizó el rol del usuario @${updatedUser.username} a ${role}.`,
+                user_id: adminId
+            }
+        });
+
+        return { message: `Rol actualizado a ${role}` };
     }
 
 }
