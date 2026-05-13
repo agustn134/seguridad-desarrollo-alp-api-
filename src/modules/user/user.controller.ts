@@ -74,6 +74,9 @@ export class UserController {
         return await this.userSvc.deleteUser(req.user.id);
     }
 
-
+    @Patch(':id')
+    update(@Param('id') id: string, @Body() updateData: any) {
+        return this.userSvc.update(+id, updateData);
+    }
 
 }
