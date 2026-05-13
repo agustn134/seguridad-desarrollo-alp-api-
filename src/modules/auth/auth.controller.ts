@@ -4,8 +4,7 @@ import { AuthService } from "./auth.service";
 import { ok } from "assert";
 import { JwtService } from "@nestjs/jwt";
 import { AuthDto } from "./dto/auth.dto";
-import { UtilService } from '../../common/services/utili.service';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { UtilService, AuthGuard } from 'src/common';
 import { request } from "http";
 import * as bcrypt from 'bcrypt';
 import { Res } from '@nestjs/common';
@@ -48,55 +47,6 @@ export class AuthController {
             sameSite: 'lax',
             maxAge: 3600000
         });
-
-        //pasamos el payload y agregamos async a la función
-        //const jwt = await this.jwtSvc.signAsync(payload, { secret: process.env.JWT_SECRET });
-
-        // TODO:  Verificar usuario y contraseña
-        // TODO: Obtener la informacion a enviar (payload)
-        // TODO: Generar token de accedo por 60s
-        // TODO: Generar refresh 
-        // TODO:  Verificar usuario y contraseña
-
-        // const user = await this.authSvc.getUserByUsername(username);
-        // if (!user) {
-        //     throw new HttpException('El usuario y/o contraseña es incorrecto', HttpStatus.UNAUTHORIZED);
-        // }
-
-        // if (await this.utilSvc.checkPassword(password, user.password!)) {
-        //     //Obtener información a enviar (payload)
-        //     const { password, ...payload } = user;
-
-        //return this.authSvc.logIn();
-        //return jwt;
-        // const refresh = await this.utilSvc.generarJWT(payload, '7d');
-        // const hashRT = await this.utilSvc.hash(refresh);
-        // await this.authSvc.updateHash(payload.id, hashRT);
-
-        // payload.hash = hashRT;
-        // const jwt = await this.utilSvc.generarJWT(payload, '1h');
-
-        // const tokens = await this.utilSvc.getTokens(payload);
-        // await this.authSvc.updateHash(payload.id, tokens.hashRT);
-
-        //login el refresh y el logut
-        //refres se va estar eejcutando de forma contante y si ya caduca entre el refresh y vuelve a refrescar el token y nunca perder el oken
-
-        //una constante que se que llame 
-        ///cons token = await this.utilSvc.generarJWT(payload) que haga lo de arriba para que sea mas limpio
-
-        // FIXME: Generar refresh token por 7d
-        // Devolvemos los tokens limpios
-        // return {
-        //     // (property) refresh_token: string,
-        //     // access_token: jwt, 
-        //     // refresh_token: hashRT
-        //     access_token: tokens.access_token,
-        //     refresh_token: tokens.refresh_token
-        // };  ///que podemos usar el pptonly o algo asi para que no se pueda copiar el token
-        // } else {
-        //     throw new HttpException('El usuario y/o contraseña es incorrecto', HttpStatus.UNAUTHORIZED);
-        // }
         return { message: 'Login exitoso y sesión segura iniciada' };
     }
 
@@ -124,22 +74,12 @@ export class AuthController {
         }
 
         //TODO: Comparar el token recibido con el token guardado
-        ///tener que pasar el hash a formato unico para que pueda pasar al front, mejor vamos a optenerlo desde la sesion, 
-        // console.log('hash de la sesion',userSession.hash);
-        // console.log('hash de la base de datos',user.hash);
-        //tenemos un metodo en el utils
 
         if (userSession.hash !== user.hash) {
             throw new HttpException('Token Invalido', HttpStatus.FORBIDDEN);
         }
 
         const { password, ...payload } = user;
-        // const newRefresh = await this.utilSvc.generarJWT(payload, '7d');
-        // const newHashRT = await this.utilSvc.hash(newRefresh);
-        // await this.authSvc.updateHash(payload.id, newHashRT);
-
-        // payload.hash = newHashRT;
-        //const newJwt = await this.utilSvc.generarJWT(payload, '1h');
 
         const tokens = await this.utilSvc.getTokens(payload);
         await this.authSvc.updateHash(payload.id, tokens.hashRT);
@@ -150,9 +90,6 @@ export class AuthController {
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token
         }
-        ///lo que sugiere el profe es que esta logica  desde fereenar redresr y token lo separemos en el utils en un objeto para nada mas llamarlo aqui y en el tokens
-
-
     }
 
 

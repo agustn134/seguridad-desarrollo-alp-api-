@@ -3,7 +3,7 @@ import { TaskService } from "./task.service";
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from "./dto/update.task.dto";
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from "../../common/guards/auth.guard";
+import { AuthGuard } from 'src/common';
 
 @ApiTags("Tareas")
 @UseGuards(AuthGuard)

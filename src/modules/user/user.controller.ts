@@ -2,10 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Par
 import { CreateUserDto } from "./dto/create.user.dto";
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from "./user.service";
-import { AuthGuard } from '../../common/guards/auth.guard';
-import { UtilService } from "src/common/services/utili.service";
-import { RolesGuard } from "src/common/guards/roles.guard";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { AuthGuard, UtilService, RolesGuard, Roles } from 'src/common';
 
 
 @ApiTags('users')

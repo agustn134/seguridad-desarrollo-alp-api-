@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AllExceptionFilter } from './common/filters/http-exception.filter';
+import { AllExceptionFilter } from './common';
 import { PrismaService } from './prisma.service';
 import helmet from 'helmet';
 import hpp from 'hpp';

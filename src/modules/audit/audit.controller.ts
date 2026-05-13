@@ -1,9 +1,7 @@
 import { Controller, Get, UseGuards, Request } from '@nestjs/common';
 import { AuditService } from './audit.service';
-import { AuthGuard } from 'src/common/guards/auth.guard';
+import { AuthGuard, Roles, RolesGuard } from 'src/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Query } from "@nestjs/common";
 
 @ApiTags('audit')
